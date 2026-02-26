@@ -1,5 +1,5 @@
-const {Sequelize} = require('sequelize');
-require('dotenv').config();
+const {Sequelize} = require('sequelize'); //importa classe sequelize (entre chaves especifica a classe) que existe dentro do pacote sequelize
+require('dotenv').config(); //
 
 const sequelize = new Sequelize(
     process.env.DB_NAME, 

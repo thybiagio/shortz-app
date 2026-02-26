@@ -2,7 +2,7 @@ const {DataTypes} =  require('sequelize');
 const sequelize = require('../../config/database');
 
 const User = sequelize.define(
-    'User', 
+    'User', //entidade
     {
         id : {
             type: DataTypes.INTEGER,
@@ -13,7 +13,56 @@ const User = sequelize.define(
             type : DataTypes.STRING,
             allowNull : false,
             unique : true
+        },
+        email : {
+            type : DataTypes.STRING, 
+            allowNull : false, 
+            unique : true, 
+            validate : { isEmail : true }
+        }, 
+        password : {
+            type : DataTypes.STRING,
+            allowNull : false,
+
+        },
+        fullName : {
+            type : DataTypes.STRING,
+            allowNull : false,
+        },
+        profilePic : {
+            type : DataTypes.STRING,
+            allowNull : true
+        },
+        bio : { 
+            type : DataTypes.TEXT,
+            allowNull : true,
+            validate : { len : [0,255] }
+        },
+        followersCount : {
+            type : DataTypes.INTEGER,
+            defaultValue : 0 // define qtd de seguidores padrão
+        },
+        followingCount : {
+            type : DataTypes.INTEGER,
+            defaultValue : 0
+        },
+        videosCount : {
+            type : DataTypes.INTEGER,
+            defaultValue : 0
+        },
+        isBlocked : {
+            type : DataTypes.BOOLEAN,
+            defaultValue : false
+        },
+        isAdmin : {
+            type : DataTypes.BOOLEAN,
+            defaultValue : false
         }
+    },
+
+    { 
+        timestamps : true,
+        tableName : 'users' //nome da tabela
     }
 );
 

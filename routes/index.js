@@ -13,4 +13,8 @@ router.get('/register', function(req, res, next){
   res.render('register', { title : 'Criar conta'});
 })
 
+const userController = require('../modules/user/userController');
+//Rota que processa o formulário de cadastro
+router.post('/register', userController.register);
+
 module.exports = router;

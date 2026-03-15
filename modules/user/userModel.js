@@ -57,6 +57,10 @@ const User = sequelize.define(
         isAdmin : {
             type : DataTypes.BOOLEAN,
             defaultValue : false
+        },
+        isBlocked: {
+            type: DataTypes.BOOLEAN, 
+            defaultValue: false
         }
     },
 

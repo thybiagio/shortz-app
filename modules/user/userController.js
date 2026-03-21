@@ -85,3 +85,38 @@ exports.logout = (req, res) => {
         red.redirect('/');
     });
 };
+
+exports.getProfile = async (userId) => { 
+    try { 
+        const user = await User.findByPk(userId, { 
+            attrubutes: ['id', 'username', 'email', 'fullname', 'bio', 'profilePicture']
+        });
+        return user;
+    } catch (error){ 
+        console.error(error);
+        throw new Error('Erro ao buscar perfil do usuário.');
+    }
+};
+
+exports.updateProfile = async (req, res) => { 
+    try{ 
+        const { fullName, bio } = req.body;
+        const userId = req.session.user.id;
+
+        const updateData = { fullName, bio };
+
+        //Se um arquivo foi enviado pelo Multer, ele estará em req.file
+        if (req.file) { 
+            updateData.profilePicture = req.file.filename;
+        }
+
+        await User.update(updateData, { where: { id: userId} });
+
+        req.flash('success', 'Perfil atualizado com sucesso!');
+        res.redirect('/profile/edit');
+    } catch (error){ 
+        console.error(error);
+        req.flash('error', 'Erro ao atualizar perfil.');
+        res.redirect('/profile/edit');
+    }
+};

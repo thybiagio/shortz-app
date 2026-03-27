@@ -6,7 +6,7 @@ const upload = require('../middlewares/multer');
 
 // Rota para a página inicial 
 router.get('/', function (req, res, next) {
-   res.render('index', { title: 'Vídeos Curtos e Engajadores' });
+   res.render('landing', { title: 'Vídeos Curtos e Engajadores' });
 });
 
 // Rota para exibir o formulário de cadastro

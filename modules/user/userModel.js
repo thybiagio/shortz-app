@@ -1,74 +1,27 @@
-const {DataTypes} =  require('sequelize');
+const { DataTypes } = require('sequelize');
 const sequelize = require('../../config/database');
 
-const User = sequelize.define(
-    'User', //entidade
+const User = sequelize.define('User',
     {
-        id : {
-            type: DataTypes.INTEGER,
-            primaryKey : true,
-            autoIncrement : true
-        }, 
-        username : {
-            type : DataTypes.STRING(20),
-            allowNull : false,
-            unique : true
-        },
-        email : {
-            type : DataTypes.STRING, 
-            allowNull : false, 
-            unique : true, 
-            validate : { isEmail : true }
-        }, 
-        password : {
-            type : DataTypes.STRING,
-            allowNull : false,
-
-        },
-        fullName : {
-            type : DataTypes.STRING(100),
-            allowNull : false,
-        },
-        profilePic : {
-            type : DataTypes.STRING,
-            allowNull : true
-        },
-        bio : { 
-            type : DataTypes.TEXT,
-            allowNull : true,
-            validate : { len : [0,255] }
-        },
-        followersCount : {
-            type : DataTypes.INTEGER,
-            defaultValue : 0 // define qtd de seguidores padrão
-        },
-        followingCount : {
-            type : DataTypes.INTEGER,
-            defaultValue : 0
-        },
-        videosCount : {
-            type : DataTypes.INTEGER,
-            defaultValue : 0
-        },
-        isBlocked : {
-            type : DataTypes.BOOLEAN,
-            defaultValue : false
-        },
-        isAdmin : {
-            type : DataTypes.BOOLEAN,
-            defaultValue : false
-        },
-        isBlocked: {
-            type: DataTypes.BOOLEAN, 
-            defaultValue: false
-        }
+        id:             { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+        username:       { type: DataTypes.STRING, allowNull: false, unique: 'idx_unique_username' },
+        email:          { type: DataTypes.STRING, allowNull: false, unique: 'idx_unique_email', validate: { isEmail: true } },
+        password:       { type: DataTypes.STRING, allowNull: false },
+        fullName:       { type: DataTypes.STRING, allowNull: true },
+        bio:            { type: DataTypes.STRING(255), allowNull: true },
+        profilePicture: { type: DataTypes.STRING, allowNull: true, defaultValue: 'default-profile.png' },
+        videosCount:    { type: DataTypes.INTEGER, defaultValue: 0 },
+        isBlocked:      { type: DataTypes.BOOLEAN, defaultValue: false },
+        isAdmin:        { type: DataTypes.BOOLEAN, defaultValue: false }
     },
-
-    { 
-        timestamps : true,
-        tableName : 'users' //nome da tabela
+    {
+        timestamps: true,
+        tableName: 'users',
+        indexes: [
+            { unique: true, fields: ['username'], name: 'idx_unique_username' },
+            { unique: true, fields: ['email'], name: 'idx_unique_email' }
+        ]
     }
 );
 
-
-module.exports = User; 
+module.exports = User;

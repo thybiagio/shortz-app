@@ -8,9 +8,11 @@ const flash = require('connect-flash');
 
 var indexRouter = require("./routes/index");
 var userRoutes = require("./modules/user/userRoutes");     // [ADICIONAR] 
+var videoRoutes = require("./modules/video/videoRoutes");
 
 var app = express();
 var expressLayouts = require("express-ejs-layouts");
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views/pages')); // Linha modificada
@@ -27,6 +29,9 @@ app.use(session({
   saveUnitialized: false,
   cookie: { maxAge: 1000 * 60 * 60 * 24} //1dia
 }));
+app.use("/", indexRouter);
+app.use("/", userRoutes);
+app.use("/", videoRoutes); //Usa as rotas de vídeo
 
 app.use(flash());
 
@@ -61,6 +66,8 @@ app.use(function(err, req, res, next) {
 //testa a conexão com o MySQL
 const sequelize = require('./config/database');
 const User = require('./modules/user/userModel');
+const Video = require("./modules/video/videoModel"); //Importa o modelo Video
+
 sequelize.sync({alter:true})
   .then( ()=> console.log('Sincronia realizada') )
   .catch( err => console.error('Erro de sincronia', err));

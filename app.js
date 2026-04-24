@@ -62,6 +62,8 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+//Importa as associações para garantir que sejam carregadas
+require("./config/associations");
 
 //testa a conexão com o MySQL
 const sequelize = require('./config/database');
@@ -69,8 +71,8 @@ const User = require('./modules/user/userModel');
 const Video = require("./modules/video/videoModel"); //Importa o modelo Video
 
 sequelize.sync({alter:true})
-  .then( ()=> console.log('Sincronia realizada') )
-  .catch( err => console.error('Erro de sincronia', err));
+  .then(()=> console.log("Banco de dados sincronizado!"))
+  .catch(err => console.error("Erro ao sincronizar banco:", err));
 
 /*
 // testa a conexão com o MySQL

@@ -2,6 +2,7 @@ const User = require('./userModel');
 const bcrypt = require('bcryptjs');
 const fs = require("fs"); // Nova importação
 const path = require("path") // Nova importação
+const Video = require('../video/videoModel'); //Importa o modelo Vídeo
 
 
 exports.register = async (req, res) => { 
@@ -134,5 +135,35 @@ exports.updateProfile = async (req, res) => {
         console.error(error);
         req.flash('error', 'Erro ao atualizar perfil.');
         res.redirect('/profile/edit');
+    }
+};
+
+exports.renderPublicProfile = async (req, res) => {
+    try {
+        const username = req.params.username; 
+        const user = await User.findOne({ 
+            where: { username },
+            include: [{ 
+                model: Video, 
+                attribuutes: ["id", "title", "thumbnailPath", "views"],
+                order: [['createdAt', 'DESC']]
+            }],
+        attributes: ["id", "username", "fullName", "bio", "profilePicture", "followersCount", "followingCount", "videosCount"]
+        });
+
+        if (!user){ 
+            req.flash("error", "Usuário não encontado.");
+            return res.redirect("/feed");
+        }
+
+        //Verifica se o perrfil sendo visualizado é o do usuário logado
+        const isOwner = req.session.user && req.session.user.id === user.id;
+
+        res.render("profile", { title: `${user.username} | Sortz-App`, profileUser: user, isOwner });
+        
+    } catch (error) {
+        console.error("Erro ao carregar perfil público:", error);
+    req.flash("error", "Erro ao carregar o perfil. Tente novamente.");
+    res.redirect("/feed");
     }
 };

@@ -67,8 +67,6 @@ require("./config/associations");
 
 //testa a conexão com o MySQL
 const sequelize = require('./config/database');
-const User = require('./modules/user/userModel');
-const Video = require("./modules/video/videoModel"); //Importa o modelo Video
 
 sequelize.sync({alter:true})
   .then(()=> console.log("Banco de dados sincronizado!"))

@@ -20,4 +20,8 @@ const Video = sequelize.define("Video",
     }
 );
 
+// Define as associações
+//User.hasMany(Video, { foreignKey: "userId" }); //Um usuário pode ter muitos vídeos
+//Video.belongsTo(User, { foreignKey: "userId" }); //Um vídeo pertence a um usuário
+
 module.exports = Video;

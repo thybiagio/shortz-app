@@ -18,3 +18,5 @@ User.hasMany(Comment,    { foreignKey: 'userId' });
 Comment.belongsTo(User,  { foreignKey: 'userId' });
 Video.hasMany(Comment,   { foreignKey: 'videoId' });
 Comment.belongsTo(Video, { foreignKey: 'videoId' });
+
+module.exports = { User, Video, Like, Comment };

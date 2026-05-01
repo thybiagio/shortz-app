@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const likeController = require("./likeController");
-constauthMiddleware = require("../../middleware/auth");
+const authMiddleware = require("../../middlewares/auth");
 
 //Rota para alternar o like (curtir/descurtir)
 router.post("/video/:videoId/toggle-like", authMiddleware, likeController.toggleLike);

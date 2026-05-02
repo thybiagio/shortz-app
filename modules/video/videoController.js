@@ -43,26 +43,30 @@ exports.uploadVideo = async (req, res) => {
 exports.streamVideo = async (req, res) => { 
     const videoId = req.params.id;
 
-    try{ 
+    try { 
         const video = await Video.findByPk(videoId);
 
         if(!video) { 
             return res.status(404).send("Vídeo não encontrado.");
         }
 
-        const videoPath = path.join(__dirname, "../../public/uploads/videos", videoPath);
+        // Correção: usando video.videoPath
+        const videoPath = path.join(__dirname, "../../public/uploads/videos", video.videoPath);
         const stat = fs.statSync(videoPath);
         const fileSize = stat.size;
         const range = req.headers.range;
 
         if(range){ 
+            // Correção: usando a variável range corretamente
             const parts = range.replace(/bytes=/, "").split("-");
             const start = parseInt(parts[0], 10);
             const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
             const chunksize = (end - start) + 1;
-            const file = fs.createReadStream(videoPath, { start, end});
+            const file = fs.createReadStream(videoPath, { start, end });
+            
             const head = { 
-                "content-Range": 'bytes ${start}-${end}/${fileSize}',
+                // Correção: usando crases para interpolação
+                "Content-Range": `bytes ${start}-${end}/${fileSize}`,
                 "Accept-Ranges": "bytes",
                 "Content-Length": chunksize,
                 "Content-Type": "video/mp4",
@@ -78,10 +82,12 @@ exports.streamVideo = async (req, res) => {
             fs.createReadStream(videoPath).pipe(res);
         }
 
-        //Incrementa as visualizações (opcional, pode ser movido para um evento de player)
+        // Incrementa as visualizações
         await video.increment("views");
+
     } catch (error) { 
-        console.error("Erro ao fazer streaming de video:", erro);
+        // Correção: usando a variável error
+        console.error("Erro ao fazer streaming de vídeo:", error);
         res.status(500).send("Erro interno do servidor");
     }
 };
@@ -106,18 +112,18 @@ exports.renderVideoPage = async (req, res) => {
         const video = await Video.findByPk(videoId, { 
             include: [{ 
                 model: User,
-                attributes: ["id", "username", "fullname", "profilePicture"]
+                attributes: ["id", "username", "fullName", "profilePicture"]
             }],
             attributes: {
                 include: [
-                    [sequelize.literal("(SELECT COUNT(*) FROM 'likes' WHERE 'likes' . 'video_id' = 'Video'.'id')"), "likesCount"],
-                    [sequelize.literal("(SELECT COUNT(*) FROM 'comments' WHERE 'comments'.'video_id' = 'Video'.'id')"), "commentsCount"]
+                    [sequelize.literal("(SELECT COUNT(*) FROM `likes` WHERE `likes`.`video_id` = `Video`.`id`)"), "likesCount"],
+                    [sequelize.literal("(SELECT COUNT(*) FROM `comments` WHERE `comments`.`video_id` = `Video`.`id`)"), "commentsCount"]
                 ]
             } 
         });
 
         if(!video) { 
-            req.flas("error", "Vídeo não encontrado.");
+            req.flash("error", "Vídeo não encontrado.");
             return res.redirect("/feed");
         }
 
@@ -132,89 +138,6 @@ exports.renderVideoPage = async (req, res) => {
         res.render("video", {title: video.title, video, isLiked });
     } catch (error) { 
         console.error("Erro ao carregar a página do vídeo: ", error);
-        req.flash("error", "Erro ao carregar o vídeo. Tente novamente.");
-        res.redirect("/feed");
-    }
-};
-
-exports.streamVideo = async (req, res) => { 
-    const videoId = req.params.id;
-
-    try{ 
-        const video = await Video.findByPk(videoId);
-
-        if(!video) { 
-            return res.status(404). send("Vídeo não encontrado.");
-        }
-
-        const videoPath = path.join(__dirname, "../../public/uploads/videos", video.videoPath);
-        const stat = fs.statSync(videoPath);
-        const fileSize = stat.size;
-        const range = req.headers.range;
-
-        if(range){
-            const parts = receiveMessageOnPort.replace(/bytes=/, "").split("-");
-            const start = parseInt(parts[0], 10);
-            const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-            const chunksize = (end - start) + 1;
-            const file = fs.createReadStream(videoPath, { start, end});
-            const head = {
-                "Content-Range": `bytes ${start}-${end}/${fileSize}`,
-                "Accept-Ranges": "bytes",
-                "Content-Length": chunksize,
-                "Content-Type": "video/mp4",
-            };
-            res.writeHead(206, head);
-            file.pipe(res);
-        } else {
-            const head = {
-                "Content-Length": fileSize,
-                "Content-Type": "video/mp4",
-            };
-            res.writeHead(200, head);
-            fs.createReadStream(videoPath).pipe(res);
-        }
-
-        // Incrementa as visualizações (opcional, pode ser movido para um evento de player)
-        await video.increment("views");
-
-    } catch (error) {
-        console.error("Erro ao fazer streaming de vídeo:", error);
-        res.status(500).send("Erro interno do servidor");
-    }
-};
-
-exports.getAllVideos = async () => {
-    const videos = await Video.findAll({
-        include: [{
-            model: User,
-            attributes: ["id", "username", "fullname", "profilePicture"]
-        }],
-        order: [["createdAt", "DESC"]],
-        limit: 20
-    });
-    return videos;
-};
-
-exports.renderVideoPage = async (req, res) => {
-    const videoId = req.params.id;
-
-    try {
-        const video = await Video.findByPk(videoId, {
-            include: [{
-                model: User,
-                attributes: ["id", "username", "fullname", "profilePicture"]
-            }]
-        });
-        
-        if (!video) {
-            req.flash("error", "Vídeo não encontrado.");
-            return res.redirect("/feed");
-        }
-
-        res.render("video", { title: video.title, video });
-    } catch (error) {
-        console.error("Erro ao carregar a página do vídeo:", error);
         req.flash("error", "Erro ao carregar o vídeo. Tente novamente.");
         res.redirect("/feed");
     }

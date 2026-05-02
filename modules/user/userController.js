@@ -46,7 +46,7 @@ exports.register = async (req, res) => {
 
 };
 
-exports.login = async (requestAnimationFrame, res) => {
+exports.login = async (req, res) => {
     try{ 
         const { login, password } = req.body; // login pode ser email ou username
     

@@ -7,7 +7,7 @@ const authMiddleware = require("../../middlewares/auth");
 router.post("/video/:videoId/comment", authMiddleware, commentController.addComment);
 
 //Rota para buscar todos os comentários de um vídeo
-router.get("/video/:videoId/comments", authMiddleware, commentController.getComments);
+router.get("/video/:videoId/comments", commentController.getComments);
 
 module.exports = router;
 

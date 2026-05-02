@@ -40,7 +40,7 @@
                 <div class="dropdown">
                     <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser"
                         data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="<%= user.profilePicture ? '/uploads/profiles/' + user.profilePicture : '/images/default-profile.png' %>"
+                        <img src="<%= avatarSrc(user.profilePicture) %>"
                             alt="mdo" width="32" height="32" class="bg-secondary">
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end text-small shadow border-0 mt-2" aria-labelledby="dropdownUser">
@@ -62,9 +62,7 @@
                 <h2 class="fw-bold mb-4 text-center">Editar Perfil</h2>
                 <form action="/profile/edit" method="POST" enctype="multipart/form-data">
                     <div class="text-center mb-4">
-                        <img src="<%= user.profilePicture ? 
-                            '/uploads/profiles/' + user.profilePicture : 
-                            '/images/default-profile.png' %>" 
+                        <img src="<%= avatarSrc(user.profilePicture) %>" 
                             alt="Foto de Perfil" class="avatar-preview" id="profileImagePreview">
                         <div class="mt-3">
                             <label for="profilePicture" class="btn btn-outline-primary btn-sm">

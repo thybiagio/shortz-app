@@ -16,9 +16,7 @@
                 <%= video.title %>
             </h1>
             <div class="d-flex align-items-center mb-3">
-                <img src="<%= video.User.profilePicture ? 
-                    '/uploads/profiles/' + video.User.profilePicture : 
-                    '/images/default-profile.png' %>" alt="<%= video.User.username %>" class="rounded-circle me-2"
+                <img src="<%= avatarSrc(video.User.profilePicture) %>" alt="<%= video.User.username %>" class="rounded-circle me-2"
                     width="40" height="40">
                 <div>
                     <h6 class="mb-0">
@@ -41,10 +39,17 @@
 
             <!-- Botão de Like e Contagem de Comentários -->
             <div class="d-flex align-items-center gap-3 mb-4">
+                <% if (user) { %>
                 <button id="likeButton" class="btn btn-light btn-sm rounded-pill px-3 d-flex align-items-center">
                     <i class="bi <%= isLiked ? 'bi-heart-fill text-danger' : 'bi-heart' %> me-2"></i>
                     <span id="likesCount"><%= video.likesCount %></span>
                 </button>
+                <% } else { %>
+                <a href="/login" class="btn btn-light btn-sm rounded-pill px-3 d-flex align-items-center text-decoration-none">
+                    <i class="bi bi-heart me-2"></i>
+                    <span id="likesCount"><%= video.likesCount %></span>
+                </a>
+                <% } %>
                 <span class="text-muted"><%= video.commentsCount %> Comentários</span>
             </div>
 
@@ -121,9 +126,9 @@
                         data.comments.forEach(comment => {
                             const commentElement = `
                                 <div class="list-group-item d-flex align-items-start mb-2">
-                                    <img src="${comment.User.profilePicture ? 
+                                    <img src="${comment.User.profilePicture && comment.User.profilePicture !== 'default-profile.png' ? 
                                         '/uploads/profiles/' + comment.User.profilePicture : 
-                                        '/images/default-profile.png'}" 
+                                        '/images/default-profile.svg'}" 
                                         alt="${comment.User.username}" class="rounded-circle me-3" width="40" height="40">
                                     <div>
                                         <h6 class="mb-0">${comment.User.fullName} <small class="text-muted">@${comment.User.username}</small></h6>

@@ -2,9 +2,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="profile-card text-center p-4 mb-4">
-                <img src="<%= profileUser.profilePicture ? 
-                    '/uploads/profiles/' + profileUser.profilePicture : 
-                    '/images/default-profile.png' %>" 
+                <img src="<%= avatarSrc(profileUser.profilePicture) %>" 
                     alt="<%= profileUser.username %>" class="avatar-preview mb-3">
 
                 <h2 class="h4 fw-bold mb-1"><%= profileUser.fullName %></h2>
@@ -54,9 +52,7 @@
                                 <div class="p-3">
                                     <h6 class="text-truncate mb-1"><a href="/video/<%= video.id %>" class="text-decoration-none text-dark"><%= video.title %></a></h6>
                                     <div class="d-flex align-items-center">
-                                        <img src="<%= profileUser.profilePicture ? 
-                                            '/uploads/profiles/' + profileUser.profilePicture : 
-                                            '/images/default-profile.png' %>" 
+                                        <img src="<%= avatarSrc(profileUser.profilePicture) %>" 
                                             alt="<%= profileUser.username %>" class="rounded-circle me-2" width="24" height="24">
                                         <span class="text-muted small">@<%= profileUser.username %></span>
                                     </div>

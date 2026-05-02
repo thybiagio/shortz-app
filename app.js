@@ -20,7 +20,10 @@ var app = express();
 var expressLayouts = require("express-ejs-layouts");
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views/pages'));
+app.set('views', [
+  path.join(__dirname, 'views/pages'),
+  path.join(__dirname, 'views')
+]);
 app.set("layout", path.join(__dirname, "views/layouts/main"));
 app.use(expressLayouts);
 app.set('view engine', 'ejs');
@@ -42,6 +45,11 @@ app.use(flash());
 app.use((req, res, next) => { 
   res.locals.messages = req.flash();
   res.locals.user = req.session.user || null;
+  res.locals.avatarSrc = (profilePicture) => {
+    return profilePicture && profilePicture !== 'default-profile.png'
+      ? `/uploads/profiles/${profilePicture}`
+      : '/images/default-profile.svg';
+  };
   next();
 });
 

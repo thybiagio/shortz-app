@@ -22,7 +22,4 @@ router.get("/video/:id", videoController.renderVideoPage);
 
 router.get("/video/:id/data", videoController.streamVideo);
 
-// Rota para exibir a página de reprodução de vídeo
-router.get("/video/:id", videoController.renderVideoPage);
-
 module.exports = router;

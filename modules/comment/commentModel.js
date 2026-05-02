@@ -5,7 +5,7 @@ const Comment = sequelize.define("Comment",
     { 
         id: {type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true}, 
         content: {type: DataTypes.TEXT, allowNull: false },
-        userId: {type: DataTypes.INTEGER, allowNull: false, references: { model: "videos", key: "id" }},
+        userId: {type: DataTypes.INTEGER, allowNull: false, references: { model: "users", key: "id" }},
         videoId: {type: DataTypes.INTEGER, allowNull: false, references: { model: "videos", key: "id" }}
     }, 
     { 

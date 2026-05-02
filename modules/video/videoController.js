@@ -96,7 +96,7 @@ exports.getAllVideos = async () => {
     const videos = await Video.findAll({ 
         include: [{ 
             model: User,
-            attributes: ["id", "username", "fullname", "profilePicture"]
+            attributes: ["id", "username", "fullName", "profilePicture"]
         }],
         order: [["createdAt", "DESC"]],
         limit: 20

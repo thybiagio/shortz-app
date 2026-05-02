@@ -10,7 +10,7 @@ exports.register = async (req, res) => {
     try { 
         // 1. Validação básica de senhas coincidentes
         if (password !== confirmPassword){ 
-            requestAnimationFrame.flash('error', 'As senhas não coincidem.');
+            req.flash('error', 'As senhas não coincidem.');
             return res.redirect('/register');
         }
 
@@ -67,7 +67,7 @@ exports.login = async (req, res) => {
     } 
 
     // 3. Criar a sessão do usuário
-    const userData = await this.getProfile(user.id);
+    const userData = await exports.getProfile(user.id);
     req.session.user = userData;
 
     // 4. Redirecionar para o feed
@@ -83,14 +83,14 @@ exports.login = async (req, res) => {
 
 exports.logout = (req, res) => { 
     req.session.destroy(() => { 
-        red.redirect('/');
+        res.redirect('/');
     });
 };
 
 exports.getProfile = async (userId) => { 
     try { 
         const user = await User.findByPk(userId, { 
-            attrubutes: ['id', 'username', 'email', 'fullname', 'bio', 'profilePicture']
+            attributes: ['id', 'username', 'email', 'fullName', 'bio', 'profilePicture']
         });
         return user;
     } catch (error){ 
@@ -126,7 +126,7 @@ exports.updateProfile = async (req, res) => {
         }
 
         //Atualiza os dados do usuário na sessão para refletir as mudanças imediatamente
-        const userData = await this.getProfile(userId);
+        const userData = await exports.getProfile(userId);
         req.session.user = userData;
 
         req.flash('success', 'Perfil atualizado com sucesso!');
@@ -145,7 +145,7 @@ exports.renderPublicProfile = async (req, res) => {
             where: { username },
             include: [{ 
                 model: Video, 
-                attribuutes: ["id", "title", "thumbnailPath", "views"],
+                attributes: ["id", "title", "thumbnailPath", "views"],
                 order: [['createdAt', 'DESC']]
             }],
         attributes: ["id", "username", "fullName", "bio", "profilePicture", "followersCount", "followingCount", "videosCount"]

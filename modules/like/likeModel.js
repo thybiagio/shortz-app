@@ -1,16 +1,17 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../../config/database");
 
-const Like = sequelize.define("Like",
-    { 
-        id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-        userId: {type: DataTypes.INTEGER, allowNull: false, references: { model: "videos", key: "id" }}
+const Like = sequelize.define("Like", 
+    {
+        id:         { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+        userId:     { type: DataTypes.INTEGER, allowNull: false, references: { model: "users", key: "id" } },
+        videoId:    { type: DataTypes.INTEGER, allowNull: false, references: { model: "videos", key: "id" } }
     }, 
-    { 
-        tableName: "likes", 
+    {
+        tableName: "likes",
         timestamps: true,
-        indexes: [ 
-            { fields: ['user_id', 'video_id'], unique: true, name: 'idx_unique_like' } //Garante que um usuário só possa curtir um vídeo uma vez
+        indexes: [
+            { fields: ['user_id', 'video_id'], unique: true, name: 'idx_unique_like' } // Garante que um usuário só pode curtir um vídeo uma vez
         ]
     }
 );

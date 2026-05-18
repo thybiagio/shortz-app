@@ -1,101 +1,55 @@
-const User = require('./userModel');
-const bcrypt = require('bcryptjs');
-const fs = require("fs"); // Nova importação
-const path = require("path") // Nova importação
-const Video = require('../video/videoModel'); //Importa o modelo Vídeo
+const userService = require("./userService");
+const Video = require("../video/videoModel"); // Ainda necessário para include no renderPublicProfile
 
-
-exports.register = async (req, res) => { 
+exports.register = async (req, res) => {
     const { username, email, password, confirmPassword, fullName } = req.body;
-    try { 
-        // 1. Validação básica de senhas coincidentes
-        if (password !== confirmPassword){ 
-            req.flash('error', 'As senhas não coincidem.');
-            return res.redirect('/register');
+    try{ 
+        if (password != confirmPassword){
+            req.flash("error", "As senhas não coincidem.");
+            return res.redirect("/register");
         }
 
-        // 2. Verificar se usuário ou email já existem (opcial, mas melhora o UX)
-        const emailExists = await User.findOne({ where: { email }});
-        const usernameExists = await User.findOne({ where: { username}});
-        if (emailExists || usernameExists){ 
-            req.flash('error', 'Este email já está cadastrado.');
-            return res.redirect('/register');
-        }
+        await userService.registerUser(username, email, password, fullName);
 
-        // 3. Hash da senha
-        const salt = await bcrypt.genSalt(10);
-        const  hashedPassword = await bcrypt.hash(password, salt);
-        console.log(password, hashedPassword);
-
-        //4. Salvar no banco
-        await User.create({
-            username,
-            email,
-            password: hashedPassword, 
-            fullName
-        });
-
-        // 5. Redirecionar para login com mensagem de sucesso
-        req.flash('success', 'Conta criada com sucesso! Faça seu Login.');
-        res.redirect('/login');
+        req.flash("success", "Conta criada com sucesso! Faça seu login.");
+        res.redirect("/login");
     } catch (error) {
         console.error(error);
-        req.flash('error', 'Erro ao criar conta. Verifique os dados e tente novamente.');
-        res.redirect('/register');
+        req.flash("error", error.message || "Erro ao criar conta.Verifique os dados e tente novaente.");
+        res.redirect("/register");
     }
-
 };
 
 exports.login = async (req, res) => {
     try{ 
-        const { login, password } = req.body; // login pode ser email ou username
+        const { login, password } = req.body;
+
+        const user = await userService.loginUser(login, password);
+
+        const userData = await userService.getUserProfile(user.id);
+        req.session.user = userData;
+
+        res.redirect("/feed");
     
-
-    // 1. Buscar usuário por emial OU username
-    const user = await User.findOne({ 
-        where: { 
-            [require('sequelize').Op.or]: [{ email: login }, 
-                { username: login 
-            }]
-        }
-    });
-
-    // 2. Verificar se usuário existe e se a senha bate
-    if (!user || !(await bcrypt.compare(password, user.password))) { 
-        req.flash('error', 'E-mail/Usuário ou senha incorretos.');
-        return res.redirect('/login');
-    } 
-
-    // 3. Criar a sessão do usuário
-    const userData = await exports.getProfile(user.id);
-    req.session.user = userData;
-
-    // 4. Redirecionar para o feed
-    res.redirect('/feed');
-
-    
-    } catch (error) { 
-    console.error(error);
-    req.flash('error', 'Ocorreu um erro ao tentar entrar.');
-    res.redirect('/login');
-    };
+    } catch (error) {
+        console.error(error);
+        req.flash("error", error.message || "Ocorreu um erro ao tentar entrar.");
+        res.redirect("/login");
+    }
 };
 
-exports.logout = (req, res) => { 
-    req.session.destroy(() => { 
-        res.redirect('/');
+exports.logout = (req, res) => {
+    req.session.destroy(() => {
+        res.redirect("/");
     });
 };
 
 exports.getProfile = async (userId) => { 
-    try { 
-        const user = await User.findByPk(userId, { 
-            attributes: ['id', 'username', 'email', 'fullName', 'bio', 'profilePicture']
-        });
-        return user;
-    } catch (error){ 
+    try{ 
+        return await userService.getUserProfile(userId);
+    } catch (error) {
         console.error(error);
-        throw new Error('Erro ao buscar perfil do usuário.');
+        throw new Error("Erro ao buscar perfil do usuário.");
     }
 };
 
@@ -103,67 +57,33 @@ exports.updateProfile = async (req, res) => {
     try{ 
         const { fullName, bio } = req.body;
         const userId = req.session.user.id;
+        const newProfilePictureFilename = req.file ? req.file.filename : null;
 
-        const updateData = { fullName, bio };
+        const updatedUser = await userService.updateUserProfile(userId, fullName, bio, newProfilePictureFilename);
 
-        //Se um arquivo foi enviado pelo Multer, ele estará em req.file
-        if (req.file) { 
-            updateData.profilePicture = req.file.filename;
-        }
-        //Obtém o nome da foto de perfil antiga antes de atualizar
-        const oldUser = await User.findByPk(userId);
+        req.session.user = updatedUser;
 
-        await User.update(updateData, { where: { id: userId} });
-        
-        // Se uma nova foto foi enviada e o usuário tinha uma foto anterior (não a default),
-        // apagar a foto antiga do sistema de arquivos
-        if (req.file && oldUser.profilePicture && oldUser.profilePicture !== 'default-profile.png'){ 
-            const oldProfilePicPath = path.join(__dirname, '../../public/uploads/profiles', oldUser.profilePicture);
-            fs.unlink(oldProfilePicPath, (err) => { 
-                if (err) console.error('Erro ao apagar foto de perfil antiga: ', err);
-                else console.log('Foto de perfil antiga apagada: ', oldProfilePicPath);
-            });
-        }
-
-        //Atualiza os dados do usuário na sessão para refletir as mudanças imediatamente
-        const userData = await exports.getProfile(userId);
-        req.session.user = userData;
-
-        req.flash('success', 'Perfil atualizado com sucesso!');
-        res.redirect('/profile/edit');
-    } catch (error){ 
+        req.flash("success", "Perfil atualizado com sucesso!");
+        res.redirect("/profile/edit");
+    } catch (error) { 
         console.error(error);
-        req.flash('error', 'Erro ao atualizar perfil.');
-        res.redirect('/profile/edit');
+        req.flash("error", error.message || "Erro ao atualizar perfil.");
+        res.redirect("/profile/edit");
     }
 };
 
 exports.renderPublicProfile = async (req, res) => {
-    try {
-        const username = req.params.username; 
-        const user = await User.findOne({ 
-            where: { username },
-            include: [{ 
-                model: Video, 
-                attributes: ["id", "title", "thumbnailPath", "views"],
-                order: [['createdAt', 'DESC']]
-            }],
-        attributes: ["id", "username", "fullName", "bio", "profilePicture", "followersCount", "followingCount", "videosCount"]
-        });
+    try{ 
+        const username = req.params.username;
+        const user = await userService.getUserByUsername(username);
 
-        if (!user){ 
-            req.flash("error", "Usuário não encontado.");
-            return res.redirect("/feed");
-        }
-
-        //Verifica se o perrfil sendo visualizado é o do usuário logado
         const isOwner = req.session.user && req.session.user.id === user.id;
 
-        res.render("profile", { title: `${user.username} | Sortz-App`, profileUser: user, isOwner });
-        
+        res.render("profile", { title: `@${user.username} | Shortz-App`, user, isOwner });
+    
     } catch (error) {
-        console.error("Erro ao carregar perfil público:", error);
-    req.flash("error", "Erro ao carregar o perfil. Tente novamente.");
-    res.redirect("/feed");
+        console.error("Erro ao carregar perfil publico:", error);
+        req.flash("error", error.message || "Erro ao carregar o perfil. Tente novamente.");
+        res.redirect("/feed");
     }
 };

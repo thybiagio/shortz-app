@@ -1,4 +1,4 @@
-const Useer = require('./userModel');
+const User = require('./userModel');
 const Video = require('../video/videoModel');
 const bcrypt = require('bcryptjs');
 const fs = require('fs');
